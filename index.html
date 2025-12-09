@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bulk Sender Panel</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+    <style>
+        /* --- General Styling --- */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .panel-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 550px;
+        }
+        h2 {
+            color: #1a1a1a;
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #25d366;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* --- Input Styling --- */
+        input[type="text"], 
+        textarea, 
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .submit-btn {
+            background-color: #25d366;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .note {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fffde7;
+            border: 1px solid #ffeb3b;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #616161;
+        }
+
+        /* --- Global Number Input Styling --- */
+        .number-input-group {
+            display: flex;
+            gap: 5px; 
+            align-items: center; 
+        }
+        /* Target Select2 container */
+        .number-input-group .select2-container {
+            width: 50% !important; 
+            flex-shrink: 0;
+        }
+        /* Custom styling for Select2 input field to match others */
+        .select2-container .select2-selection--single {
+            height: 40px; 
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 0;
+        }
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            line-height: 40px;
+            padding-left: 10px;
+        }
+        .select2-container .select2-selection--single .select2-selection__arrow {
+            height: 38px;
+        }
+
+        .number-input-group input[type="text"] {
+            width: 50%;
+        }
+
+        /* --- Media Specific Styling (Unchanged) --- */
+        .icon-management {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 10px;
+            padding-top: 10px;
+            padding-bottom: 20px;
+            border-top: 1px dashed #ccc;
+            border-bottom: 1px dashed #ccc;
+        }
+        .icon-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #eee;
+            border: 2px solid #25d366;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .icon-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #attachmentPreviewContainer {
+            max-width: 100%;
+            max-height: 250px;
+            overflow: hidden;
+            border-radius: 4px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #attachmentPreviewContainer img, 
+        #attachmentPreviewContainer video {
+            max-width: 100%;
+            max-height: 248px;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="panel-container">
+    <h2>📱 WhatsApp Sender Panel</h2>
+
+    <form id="senderForm">
+        
+        <div class="form-group">
+            <label for="senderName">Sender Name (Business Name) (Optional):</label>
+            <input type="text" id="senderName" name="senderName" placeholder="Enter your Business Name here">
+        </div>
+
+        <div class="form-group">
+            <label for="countryCode">Recipient Number (Individual):</label>
+            <div class="number-input-group">
+                <select id="countryCode" name="countryCode">
+                    <option value="">-- Select Code --</option>
+                    <option value="+91" data-min="10" data-max="10" selected>🇮🇳 India (+91)</option>
+                    <option value="+1" data-min="10" data-max="10">🇺🇸 USA/🇨🇦 Canada (+1)</option>
+                    <option value="+44" data-min="10" data-max="10">🇬🇧 UK (+44)</option>
+                    <option value="+971" data-min="8" data-max="9">🇦🇪 UAE (+971)</option>
+                    <option value="+55" data-min="10" data-max="11">🇧🇷 Brazil (+55)</option>
+                    <option value="+7" data-min="10" data-max="10">🇰🇿 Kazakhstan/🇷🇺 Russia (+7)</option>
+                    <option value="+60" data-min="9" data-max="10">🇲🇾 Malaysia (+60)</option>
+                    <option value="+92" data-min="10" data-max="10">🇵🇰 Pakistan (+92)</option>
+                    <option value="+65" data-min="8" data-max="8">🇸🇬 Singapore (+65)</option>
+                    <option value="+34" data-min="9" data-max="9">🇪🇸 Spain (+34)</option>
+                    <option value="+93" data-min="9" data-max="9">🇦🇫 Afghanistan (+93)</option>
+                    <option value="+355" data-min="8" data-max="9">🇦🇱 Albania (+355)</option>
+                    <option value="+213" data-min="9" data-max="9">🇩🇿 Algeria (+213)</option>
+                    <option value="+376" data-min="6" data-max="9">🇦🇩 Andorra (+376)</option>
+                    <option value="+244" data-min="9" data-max="9">🇦🇴 Angola (+244)</option>
+                    <option value="+54" data-min="8" data-max="10">🇦🇷 Argentina (+54)</option>
+                    <option value="+374" data-min="8" data-max="8">🇦🇲 Armenia (+374)</option>
+                    <option value="+61" data-min="8" data-max="9">🇦🇺 Australia (+61)</option>
+                    <option value="+43" data-min="10" data-max="11">🇦🇹 Austria (+43)</option>
+                    <option value="+994" data-min="9" data-max="9">🇦🇿 Azerbaijan (+994)</option>
+                    <option value="+973" data-min="8" data-max="8">🇧🇭 Bahrain (+973)</option>
+                    <option value="+880" data-min="10" data-max="10">🇧🇩 Bangladesh (+880)</option>
+                    <option value="+32" data-min="8" data-max="9">🇧🇪 Belgium (+32)</option>
+                    <option value="+501" data-min="7" data-max="7">🇧🇿 Belize (+501)</option>
+                    <option value="+229" data-min="8" data-max="8">🇧🇯 Benin (+229)</option>
+                    <option value="+975" data-min="8" data-max="8">🇧🇹 Bhutan (+975)</option>
+                    <option value="+591" data-min="8" data-max="8">🇧🇴 Bolivia (+591)</option>
+                    <option value="+387" data-min="8" data-max="8">🇧🇦 Bosnia and Herzegovina (+387)</option>
+                    <option value="+267" data-min="7" data-max="8">🇧🇼 Botswana (+267)</option>
+                    <option value="+359" data-min="8" data-max="9">🇧🇬 Bulgaria (+359)</option>
+                    <option value="+237" data-min="8" data-max="9">🇨🇲 Cameroon (+237)</option>
+                    <option value="+56" data-min="8" data-max="9">🇨🇱 Chile (+56)</option>
+                    <option value="+86" data-min="11" data-max="11">🇨🇳 China (+86)</option>
+                    <option value="+57" data-min="10" data-max="10">🇨🇴 Colombia (+57)</option>
+                    <option value="+506" data-min="8" data-max="8">🇨🇷 Costa Rica (+506)</option>
+                    <option value="+385" data-min="8" data-max="10">🇭🇷 Croatia (+385)</option>
+                    <option value="+53" data-min="8" data-max="8">🇨🇺 Cuba (+53)</option>
+                    <option value="+357" data-min="8" data-max="8">🇨🇾 Cyprus (+357)</option>
+                    <option value="+420" data-min="9" data-max="9">🇨🇿 Czech Republic (+420)</option>
+                    <option value="+45" data-min="8" data-max="8">🇩🇰 Denmark (+45)</option>
+                    <option value="+593" data-min="9" data-max="9">🇪🇨 Ecuador (+593)</option>
+                    <option value="+20" data-min="10" data-max="10">🇪🇬 Egypt (+20)</option>
+                    <option value="+503" data-min="8" data-max="8">🇸🇻 El Salvador (+503)</option>
+                    <option value="+251" data-min="9" data-max="9">🇪🇹 Ethiopia (+251)</option>
+                    <option value="+358" data-min="9" data-max="10">🇫🇮 Finland (+358)</option>
+                    <option value="+33" data-min="9" data-max="9">🇫🇷 France (+33)</option>
+                    <option value="+49" data-min="10" data-max="11">🇩🇪 Germany (+49)</option>
+                    <option value="+233" data-min="9" data-max="10">🇬🇭 Ghana (+233)</option>
+                    <option value="+30" data-min="10" data-max="10">🇬🇷 Greece (+30)</option>
+                    <option value="+502" data-min="8" data-max="8">🇬🇹 Guatemala (+502)</option>
+                    <option value="+509" data-min="8" data-max="8">🇭🇹 Haiti (+509)</option>
+                    <option value="+504" data-min="8" data-max="8">🇭🇳 Honduras (+504)</option>
+                    <option value="+852" data-min="8" data-max="8">🇭🇰 Hong Kong (+852)</option>
+                    <option value="+36" data-min="9" data-max="9">🇭🇺 Hungary (+36)</option>
+                    <option value="+354" data-min="7" data-max="9">🇮🇸 Iceland (+354)</option>
+                    <option value="+98" data-min="10" data-max="10">🇮🇷 Iran (+98)</option>
+                    <option value="+964" data-min="9" data-max="10">🇮🇶 Iraq (+964)</option>
+                    <option value="+353" data-min="9" data-max="9">🇮🇪 Ireland (+353)</option>
+                    <option value="+972" data-min="9" data-max="9">🇮🇱 Israel (+972)</option>
+                    <option value="+39" data-min="9" data-max="10">🇮🇹 Italy (+39)</option>
+                    <option value="+81" data-min="10" data-max="10">🇯🇵 Japan (+81)</option>
+                    <option value="+962" data-min="8" data-max="9">🇯🇴 Jordan (+962)</option>
+                    <option value="+254" data-min="9" data-max="9">🇰🇪 Kenya (+254)</option>
+                    <option value="+965" data-min="8" data-max="8">🇰🇼 Kuwait (+965)</option>
+                    <option value="+961" data-min="7" data-max="8">🇱🇧 Lebanon (+961)</option>
+                    <option value="+218" data-min="9" data-max="9">🇱🇾 Libya (+218)</option>
+                    <option value="+370" data-min="8" data-max="8">🇱🇹 Lithuania (+370)</option>
+                    <option value="+352" data-min="8" data-max="9">🇱🇺 Luxembourg (+352)</option>
+                    <option value="+52" data-min="10" data-max="10">🇲🇽 Mexico (+52)</option>
+                    <option value="+977" data-min="9" data-max="10">🇳🇵 Nepal (+977)</option>
+                    <option value="+31" data-min="9" data-max="9">🇳🇱 Netherlands (+31)</option>
+                    <option value="+64" data-min="8" data-max="9">🇳🇿 New Zealand (+64)</option>
+                    <option value="+234" data-min="10" data-max="11">🇳🇬 Nigeria (+234)</option>
+                    <option value="+47" data-min="8" data-max="8">🇳🇴 Norway (+47)</option>
+                    <option value="+968" data-min="8" data-max="8">🇴🇲 Oman (+968)</option>
+                    <option value="+507" data-min="7" data-max="8">🇵🇦 Panama (+507)</option>
+                    <option value="+595" data-min="9" data-max="9">🇵🇾 Paraguay (+595)</option>
+                    <option value="+51" data-min="9" data-max="9">🇵🇪 Peru (+51)</option>
+                    <option value="+63" data-min="10" data-max="10">🇵🇭 Philippines (+63)</option>
+                    <option value="+48" data-min="9" data-max="9">🇵🇱 Poland (+48)</option>
+                    <option value="+351" data-min="9" data-max="9">🇵🇹 Portugal (+351)</option>
+                    <option value="+974" data-min="8" data-max="8">🇶🇦 Qatar (+974)</option>
+                    <option value="+40" data-min="9" data-max="9">🇷🇴 Romania (+40)</option>
+                    <option value="+966" data-min="9" data-max="9">🇸🇦 Saudi Arabia (+966)</option>
+                    <option value="+27" data-min="9" data-max="9">🇿🇦 South Africa (+27)</option>
+                    <option value="+82" data-min="10" data-max="10">🇰🇷 South Korea (+82)</option>
+                    <option value="+94" data-min="9" data-max="9">🇱🇰 Sri Lanka (+94)</option>
+                    <option value="+46" data-min="9" data-max="9">🇸🇪 Sweden (+46)</option>
+                    <option value="+41" data-min="9" data-max="9">🇨🇭 Switzerland (+41)</option>
+                    <option value="+66" data-min="9" data-max="9">🇹🇭 Thailand (+66)</option>
+                    <option value="+90" data-min="10" data-max="10">🇹🇷 Turkey (+90)</option>
+                    <option value="+380" data-min="9" data-max="9">🇺🇦 Ukraine (+380)</option>
+                    <option value="+598" data-min="8" data-max="8">🇺🇾 Uruguay (+598)</option>
+                    <option value="+58" data-min="10" data-max="10">🇻🇪 Venezuela (+58)</option>
+                    <option value="+84" data-min="9" data-max="10">🇻🇳 Vietnam (+84)</option>
+                </select>
+                <input type="text" id="phoneNumber" name="phoneNumber" placeholder="Phone Number (e.g., 9876543210)" maxlength="10">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="message">Message Template Content:</label>
+            <textarea id="message" name="message" placeholder="Enter your pre-approved message content here..."></textarea>
+        </div>
+
+        <div class="form-group icon-management">
+            <div class="icon-preview" id="iconPreview">
+                <img id="currentIcon" src="https://via.placeholder.com/80?text=Logo" alt="Sender Icon">
+            </div>
+            <div class="icon-upload-area">
+                <label for="iconUpload">Update Sender Profile Icon:</label>
+                <input type="file" id="iconUpload" name="iconUpload" accept="image/png, image/jpeg">
+                <div class="note">
+                    **Note:** Changing the icon updates your permanent Business Profile picture.
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="attachment">Attachment (Optional Image/Video for the message):</label>
+            <input type="file" id="attachment" name="attachment" accept="image/*,video/*">
+            <div id="attachmentPreviewContainer" style="display: none;">
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="form-group">
+            <label for="bulkFile">Bulk Contacts File (CSV/TXT) (Optional):</label>
+            <input type="file" id="bulkFile" name="bulkFile" accept=".csv,.txt">
+            <div class="note">
+                **Tip:** यह फ़ील्ड वैकल्पिक है।
+            </div>
+        </div>
+
+        <button type="submit" id="sendBtn" class="submit-btn">🚀 Send Campaign</button>
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<script>
+    const DEFAULT_ICON_URL = "https://via.placeholder.com/80?text=Logo";
+
+    // Global variable to store phone length data dynamically from HTML attributes
+    const countryPhoneLengths = {};
+    document.querySelectorAll('#countryCode option').forEach(option => {
+        const code = option.value;
+        const min = option.getAttribute('data-min');
+        const max = option.getAttribute('data-max');
+        if (code && min && max) {
+            countryPhoneLengths[code] = { min: parseInt(min), max: parseInt(max) };
+        }
+    });
+
+    // --- Dynamic Phone Length Update Function ---
+    function updatePhoneNumberLength() {
+        const select = document.getElementById('countryCode');
+        const input = document.getElementById('phoneNumber');
+        const selectedOption = select.options[select.selectedIndex];
+        
+        if (!selectedOption) return; 
+
+        const code = selectedOption.value;
+
+        if (!code || !countryPhoneLengths[code]) {
+            input.removeAttribute('maxlength');
+            input.placeholder = 'Phone Number';
+            return;
+        }
+
+        const lengths = countryPhoneLengths[code];
+        input.setAttribute('maxlength', lengths.max);
+        
+        if (lengths.min === lengths.max) {
+             input.placeholder = `Phone Number (${lengths.max} digits)`;
+        } else {
+             input.placeholder = `Phone Number (${lengths.min}-${lengths.max} digits)`;
+        }
+    }
+    
+    // --- Select2 Initialization and event handler ---
+    $(document).ready(function() {
+        function formatCountrySelection(country) {
+            if (!country.id) return country.text;
+            const match = country.text.match(/(.*)\s\([+-]?\d+\)/);
+            if (match && match[1]) return match[1].trim(); 
+            return country.text;
+        }
+
+        $('#countryCode').select2({
+            placeholder: "🔍 Search Country Code...", 
+            allowClear: false,
+            templateSelection: formatCountrySelection 
+        });
+
+        $('#countryCode').on('select2:select', function (e) {
+            updatePhoneNumberLength();
+        });
+        
+        updatePhoneNumberLength(); 
+    });
+
+
+    // --- Media and Icon Previews (unchanged) ---
+    document.getElementById('iconUpload').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('currentIcon').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+             document.getElementById('currentIcon').src = DEFAULT_ICON_URL;
+        }
+    });
+
+    document.getElementById('attachment').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const previewContainer = document.getElementById('attachmentPreviewContainer');
+        previewContainer.innerHTML = ''; 
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewContainer.style.display = 'flex';
+                let mediaElement;
+                
+                if (file.type.startsWith('image/')) {
+                    mediaElement = document.createElement('img');
+                    mediaElement.src = e.target.result;
+                } else if (file.type.startsWith('video/')) {
+                    mediaElement = document.createElement('video');
+                    mediaElement.src = e.target.result;
+                    mediaElement.controls = true;
+                } else {
+                    previewContainer.style.display = 'block';
+                    previewContainer.innerHTML = `<p style="padding:10px;">File selected: <b>${file.name}</b></p>`;
+                    return;
+                }
+                
+                previewContainer.appendChild(mediaElement);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewContainer.style.display = 'none';
+        }
+    });
+
+
+    // --- 🚀 FINAL FORM SUBMISSION LOGIC: AJAX POST to server.js ---
+    document.getElementById('senderForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const countryCode = document.getElementById('countryCode').value.trim();
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        const message = document.getElementById('message').value.trim();
+        // Bulk File logic is omitted as Maytapi API requires individual calls or specific features
+        
+        const isIndividualNumberProvided = phoneNumber !== '' && countryCode !== '';
+        
+        if (!isIndividualNumberProvided) {
+            alert('❌ कृपया एक Recipient Number भरें और उसका Country Code चुनें।');
+            return; 
+        }
+
+        // --- VALIDATION: Phone Number Length Check ---
+        const lengths = countryPhoneLengths[countryCode];
+        const numberLength = phoneNumber.length;
+        if (lengths) {
+            if (numberLength < lengths.min || numberLength > lengths.max) {
+                alert(`❌ फ़ोन नंबर की लंबाई गलत है। ${countryCode} देश के लिए ${lengths.min} से ${lengths.max} अंक होने चाहिए।`);
+                return;
+            }
+        }
+        
+        // Disable button and show loading state
+        const sendBtn = document.getElementById('sendBtn');
+        sendBtn.disabled = true;
+        sendBtn.textContent = '⏳ Sending... Please wait.';
+
+        // Prepare data to send to server.js (as JSON)
+        const formData = {
+            countryCode: countryCode,
+            phoneNumber: phoneNumber,
+            message: message,
+        };
+
+        try {
+            // Send data to the Node.js server endpoint /send-message
+            const response = await fetch('/send-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            // Parse the JSON response from server.js
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                alert(`✅ SUCCESS: Message sent (or queued) successfully! Details: ${result.message}`);
+            } else {
+                // Handle errors (HTTP status 400/500 or Maytapi failure response)
+                const errorMessage = result.message || 'Server reported an unknown error.';
+                alert(`❌ ERROR: Message sending failed. Details: ${errorMessage}`);
+                console.error('Server Error Details:', result.details || result);
+            }
+
+        } catch (error) {
+            // Handle network failure (e.g., server not running)
+            alert(`❌ FATAL ERROR: Could not connect to the server. Is server.js running?`);
+            console.error('Fetch Error:', error);
+        } finally {
+            // Re-enable button
+            sendBtn.disabled = false;
+            sendBtn.textContent = '🚀 Send Campaign';
+        }
+    });
+</script>
+
+</body>
+</html>
